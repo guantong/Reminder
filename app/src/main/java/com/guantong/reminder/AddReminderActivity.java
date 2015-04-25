@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class AddReminderActivity extends Activity {
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +53,7 @@ public class AddReminderActivity extends Activity {
 
     public void addNewReminder(View view) throws Exception {
         try {
+            Boolean acceptInput = true;
             EditText titleInput = (EditText) findViewById(R.id.titleInputText);
             EditText descInput = (EditText) findViewById(R.id.descInputText);
             EditText dueDateInput = (EditText) findViewById(R.id.dueDateInputText);
@@ -66,44 +66,81 @@ public class AddReminderActivity extends Activity {
             Date date = format.parse(dueDate);
             Boolean complete = completeInput.isChecked();
 
+            if (title.trim().equalsIgnoreCase(""))
+            {
+                errorMessage(1);
+                acceptInput = false;
+            }
+
+            if (desc.trim().equalsIgnoreCase(""))
+            {
+                errorMessage(2);
+                acceptInput = false;
+            }
+
             Date currentDate = new Date();
 
-            if (date.before(currentDate) == false) {
+            //setup alter popup message if invalid date was selected
+            if (date.before(currentDate) == true) {
+                errorMessage(4);
+                acceptInput = false;
+            }
+
+            if (date.before(currentDate) == false && acceptInput == true) {
                 Reminder r = new Reminder(title, desc, date, complete);
                 Intent i = new Intent(this, MainActivity.class);
                 i.putExtra("Reminder", r);
                 setResult(RESULT_OK, i);
                 finish();
             }
-            if (date.before(currentDate) == true) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
-                // set title
-                alertDialogBuilder.setTitle("Input Warning");
-
-                // set dialog message
-                alertDialogBuilder
-                        .setMessage("Please set your date in future date, thanks")
-                        .setCancelable(false)
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // if this button is clicked, just close
-                                // the dialog box and do nothing
-                                dialog.cancel();
-                            }
-                        });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
-
+            if (acceptInput == false)
+            {
                 recreate();
             }
-
         } catch (Exception e) {
             throw new IOException(e.toString());
         }
+    }
+
+    public void errorMessage(int error){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        String date = "Please set your date in future dates, thanks";
+        String title = "Please check your title input, thanks";
+        String desc = "Please check your description input, thanks";
+        String message = "";
+
+        // set message for popup dialog
+        switch (error)
+        {
+            case 1: message = title;
+                break;
+            case 2: message = desc;
+                break;
+            case 4: message = date;
+                break;
+            default: break;
+        }
+
+        // set title
+        alertDialogBuilder.setTitle("Input Warning");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage(message)
+                .setCancelable(false)
+                .setNegativeButton("Re-try", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, just close
+                        // the dialog box and do nothing
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 }

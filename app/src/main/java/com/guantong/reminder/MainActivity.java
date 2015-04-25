@@ -49,14 +49,14 @@ public class MainActivity extends Activity {
             }
         });
 
-        Intent intent = getIntent();
-        String title = intent.getStringExtra("ChangeBoolean");
-
-        for (int i = 0; i < reminders.size(); i++) {
-            if (reminders.get(i).getTitle() == title) {
-                reminders.get(i).setCompleted(true);
-            }
-        }
+//        Intent intent = getIntent();
+//        String title = intent.getStringExtra("ChangeBoolean");
+//
+//        for (int i = 0; i < reminders.size(); i++) {
+//            if (reminders.get(i).getTitle() == title) {
+//                reminders.get(i).setCompleted(true);
+//            }
+//        }
     }
 
     // Creates menu items for ActionBar
@@ -91,29 +91,34 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 // Grab the Monster object out of the intent
                 Reminder m = (Reminder) data.getSerializableExtra("Reminder");
-                if (reminders.size() < 1) {
+                int size = reminders.size();
+
+                if (size < 1) {
                     reminders.add(m);
                     reminderListView.setAdapter(new ReminderAdapter(this, reminders));
                 }
-                if (reminders.size() >= 1) {
+                else if (size >= 1) {
                     for (int i = 0; i < reminders.size(); i++) {
                         if (m.getDueDate().after(reminders.get(i).getDueDate())) {
                             reminders.add(i + 1, m);
                             reminderListView.setAdapter(new ReminderAdapter(this, reminders));
                             break;
                         }
-                        if (m.getDueDate().before(reminders.get(i).getDueDate())) {
+                        else if (m.getDueDate().before(reminders.get(i).getDueDate())) {
                             reminders.add(i, m);
+                            reminderListView.setAdapter(new ReminderAdapter(this, reminders));
+                            break;
+                        }
+                        else if (m.getDueDate().equals(reminders.get(i).getDueDate()))
+                        {
+                            reminders.add(i + 1, m);
                             reminderListView.setAdapter(new ReminderAdapter(this, reminders));
                             break;
                         }
                     }
                 }
-
-
                 // Apply new adapter and update count
                 // reminderListView.setAdapter(new ReminderAdapter(this, reminders));
-
             }
         }
     }
